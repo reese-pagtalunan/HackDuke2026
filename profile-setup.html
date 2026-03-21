@@ -443,27 +443,46 @@
       document.getElementById('loading').classList.add('show');
 
       // Build profile object
-      const profile = {
-        userId:    currentUser ? currentUser.sub : 'demo-user',
-        email:     currentUser ? currentUser.email : '',
-        firstName,
-        lastName,
-        interests,
-        createdAt: new Date().toISOString()
+      const profileData = {
+        auth0_id:   currentUser ? currentUser.sub : null,
+        first_name: firstName,
+        last_name:  lastName,
+        interests:  interests
       };
 
-      // Save to localStorage for now (replace with Firebase later)
-      localStorage.setItem('hifive_profile', JSON.stringify(profile));
+      if (!profileData.auth0_id) {
+          alert('Auth error: Could not find user ID.');
+          document.getElementById('loading').classList.remove('show');
+          return;
+      }
 
-      // Simulate save delay
-      await new Promise(r => setTimeout(r, 900));
+      try {
+          // Connect to backend API
+          const response = await fetch('/api/user/profile', {
+              method: 'POST',
+              headers: {
+                  'Content-Type': 'application/json'
+              },
+              body: JSON.stringify(profileData)
+          });
 
-      // Hide loading, show success
-      document.getElementById('loading').classList.remove('show');
-      document.getElementById('form-state').style.display   = 'none';
-      document.getElementById('success-state').style.display = 'block';
-      document.getElementById('success-name').textContent    = firstName;
-      document.getElementById('progress').style.width        = '100%';
+          if (!response.ok) {
+              const error = await response.json();
+              throw new Error(error.error || 'Failed to save profile');
+          }
+
+          // Hide loading, show success
+          document.getElementById('loading').classList.remove('show');
+          document.getElementById('form-state').style.display   = 'none';
+          document.getElementById('success-state').style.display = 'block';
+          document.getElementById('success-name').textContent    = firstName;
+          document.getElementById('progress').style.width        = '100%';
+
+      } catch (err) {
+          console.error('Save error:', err);
+          alert('Error saving profile: ' + err.message);
+          document.getElementById('loading').classList.remove('show');
+      }
     });
 
     // ── Init ───────────────────────────────────────────────
