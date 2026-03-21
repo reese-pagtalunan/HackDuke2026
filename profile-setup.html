@@ -443,46 +443,43 @@
       document.getElementById('loading').classList.add('show');
 
       // Build profile object
-      const profileData = {
-        auth0_id:   currentUser ? currentUser.sub : null,
-        first_name: firstName,
-        last_name:  lastName,
-        interests:  interests
+      const profile = {
+        userId:    currentUser ? currentUser.sub : 'demo-user',
+        email:     currentUser ? currentUser.email : '',
+        firstName,
+        lastName,
+        interests,
+        createdAt: new Date().toISOString()
       };
 
-      if (!profileData.auth0_id) {
-          alert('Auth error: Could not find user ID.');
-          document.getElementById('loading').classList.remove('show');
-          return;
-      }
+      // Save to localStorage for now (replace with Firebase later)
+      const response = await fetch('https://hifiveapp-7y7nb.ondigitalocean.app//api/user/profile', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        auth0_id: currentUser.sub,
+        first_name: firstName,
+        last_name: lastName,
+        interests: interests
+      })
+    });
 
-      try {
-          // Connect to backend API
-          const response = await fetch('/api/user/profile', {
-              method: 'POST',
-              headers: {
-                  'Content-Type': 'application/json'
-              },
-              body: JSON.stringify(profileData)
-          });
+    if (!response.ok) {
+        const err = await response.json();
+        console.error('Profile save failed:', err);
+        document.getElementById('loading').classList.remove('show');
+        alert('Failed to save profile. Please try again.');
+        return;
+    }
 
-          if (!response.ok) {
-              const error = await response.json();
-              throw new Error(error.error || 'Failed to save profile');
-          }
-
-          // Hide loading, show success
-          document.getElementById('loading').classList.remove('show');
-          document.getElementById('form-state').style.display   = 'none';
-          document.getElementById('success-state').style.display = 'block';
-          document.getElementById('success-name').textContent    = firstName;
-          document.getElementById('progress').style.width        = '100%';
-
-      } catch (err) {
-          console.error('Save error:', err);
-          alert('Error saving profile: ' + err.message);
-          document.getElementById('loading').classList.remove('show');
-      }
+      // Hide loading, show success
+      document.getElementById('loading').classList.remove('show');
+      document.getElementById('form-state').style.display   = 'none';
+      document.getElementById('success-state').style.display = 'block';
+      document.getElementById('success-name').textContent    = firstName;
+      document.getElementById('progress').style.width        = '100%';
     });
 
     // ── Init ───────────────────────────────────────────────
