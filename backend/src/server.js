@@ -6,6 +6,7 @@ const http = require('http');
 const socketHandler = require('./sockets');
 const locationRoutes = require('./routes/location');
 const friendsRoutes = require('./routes/friends');
+const userRoutes = require('./routes/user');
 
 const app = express();
 const server = http.createServer(app);
@@ -20,6 +21,7 @@ socketHandler(server);
 // Routes
 app.use('/api/location', locationRoutes);
 app.use('/api/friends', friendsRoutes);
+app.use('/api/user', userRoutes);
 
 // Health check specifically for DigitalOcean App Platform setup
 app.get('/health', (req, res) => {
