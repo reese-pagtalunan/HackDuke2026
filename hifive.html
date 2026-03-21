@@ -512,6 +512,7 @@
     const AUTH0_CLIENT_ID = 'pOTTptqjjjExXAGuHaFXExOaVjgiWa4U';
 
     let auth0Client = null;
+    let justLoggedIn = false;
 
     async function initAuth0() {
       auth0Client = await auth0.createAuth0Client({
@@ -524,6 +525,7 @@
       if (location.search.includes('code=') || location.search.includes('error=')) {
         await auth0Client.handleRedirectCallback();
         window.history.replaceState({}, document.title, window.location.pathname);
+        justLoggedIn = true;
       }
 
       updateUI();
@@ -540,6 +542,11 @@
         userDiv.style.display   = 'flex';
         document.getElementById('nav-username').textContent = user.name || user.email;
         if (user.picture) document.getElementById('nav-avatar').src = user.picture;
+
+        // Redirect to profile setup after a fresh login
+        if (justLoggedIn) {
+          window.location.href = 'profile-setup.html';
+        }
       } else {
         loginBtn.style.display = 'block';
         userDiv.style.display  = 'none';
