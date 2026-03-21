@@ -7,7 +7,7 @@ const { auth } = require('express-oauth2-jwt-bearer');
 const socketHandler = require('./sockets');
 const locationRoutes = require('./routes/location');
 const friendsRoutes = require('./routes/friends');
-const usersRoutes = require('./routes/users');
+const usersRoutes = require('./routes/user');
 
 const app = express();
 const server = http.createServer(app);
@@ -33,7 +33,7 @@ app.get('/health', (req, res) => {
 // Protected routes
 app.use('/api/location', checkJwt, locationRoutes);
 app.use('/api/friends', checkJwt, friendsRoutes);
-app.use('/api/users', checkJwt, usersRoutes);
+app.use('/api/user', checkJwt, usersRoutes);
 
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
