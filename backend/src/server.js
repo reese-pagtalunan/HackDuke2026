@@ -18,8 +18,8 @@ app.use(express.json());
 
 // Auth0 JWT checker
 const checkJwt = auth({
-    audience: 'https://dev-gnf25xr2lt37ohtu.us.auth0.com/api/v2/',
-    issuerBaseURL: 'https://dev-gnf25xr2lt37ohtu.us.auth0.com',
+    audience: process.env.AUTH0_AUDIENCE,
+    issuerBaseURL: process.env.AUTH0_ISSUER,
 });
 
 // Socket.io
@@ -31,9 +31,9 @@ app.get('/health', (req, res) => {
 });
 
 // Protected routes
-app.use('/api/location', locationRoutes);
-app.use('/api/friends', friendsRoutes);
-app.use('/api/user', usersRoutes);
+app.use('/api/location', checkJwt, locationRoutes);
+app.use('/api/friends', checkJwt, friendsRoutes);
+app.use('/api/user', checkJwt, usersRoutes);
 
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
