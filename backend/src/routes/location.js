@@ -2,8 +2,19 @@ const express = require('express');
 const router = express.Router();
 const db = require('../db');
 
-// /api/location/ping
-// Example Input: { userId: 1, lat: 37.7749, lng: -122.4194 }
+// Haversine formula — returns distance between two GPS points in meters
+function getDistanceMeters(lat1, lng1, lat2, lng2) {
+    const R = 6371000;
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLng = (lng2 - lng1) * Math.PI / 180;
+    const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+              Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+              Math.sin(dLng/2) * Math.sin(dLng/2);
+    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+}
+
+// POST /api/location/ping
+// Input: { userId, lat, lng }
 router.post('/ping', async (req, res) => {
     const { userId, lat, lng } = req.body;
 
@@ -12,39 +23,40 @@ router.post('/ping', async (req, res) => {
     }
 
     try {
-        // 1. Update user location using PostGIS
-        // Note: PostGIS uses (Longitude, Latitude) order for ST_MakePoint
+        // 1. Update this user's location
         const updateQuery = `
             UPDATE users 
-            SET geom = ST_SetSRID(ST_MakePoint($1, $2), 4326),
-                last_ping_time = CURRENT_TIMESTAMP
+            SET lat = $1, lng = $2, last_ping_time = CURRENT_TIMESTAMP
             WHERE id = $3
             RETURNING id;
         `;
-        const userRes = await db.query(updateQuery, [lng, lat, userId]);
+        const userRes = await db.query(updateQuery, [lat, lng, userId]);
 
         if (userRes.rowCount === 0) {
             return res.status(404).json({ error: 'User not found' });
         }
 
-        // 2. Find nearby users (within 50 meters) who recently pinged
+        // 2. Get all recently active users
         const nearbyQuery = `
-            SELECT id, username 
+            SELECT id, username, lat, lng 
             FROM users 
             WHERE id != $1 
-              AND ST_DWithin(geom::geography, ST_SetSRID(ST_MakePoint($2, $3), 4326)::geography, 50)
-              AND last_ping_time > CURRENT_TIMESTAMP - INTERVAL '5 minutes';
+            AND last_ping_time > CURRENT_TIMESTAMP - INTERVAL '5 minutes'
+            AND lat IS NOT NULL;
         `;
-        const nearbyUsers = await db.query(nearbyQuery, [userId, lng, lat]);
+        const allUsers = await db.query(nearbyQuery, [userId]);
 
-        // 3. Log an encounter for everyone we just passed by
-        const updates = [];
-        for (const nearbyUser of nearbyUsers.rows) {
-            // Sort IDs to ensure (A, B) and (B, A) are treated as the same unique constraint in the DB
+        // 3. Filter to users within 50 meters using Haversine
+        const nearbyUsers = allUsers.rows.filter(u =>
+            getDistanceMeters(lat, lng, u.lat, u.lng) <= 50
+        );
+
+        // 4. Log encounters for nearby users
+        const updates = nearbyUsers.map(nearbyUser => {
             const userA = Math.min(userId, nearbyUser.id);
             const userB = Math.max(userId, nearbyUser.id);
 
-            const encounterQuery = `
+            return db.query(`
                 INSERT INTO encounters (user_a_id, user_b_id, encounter_count, last_seen_date)
                 VALUES ($1, $2, 1, CURRENT_TIMESTAMP)
                 ON CONFLICT (user_a_id, user_b_id) 
@@ -52,15 +64,27 @@ router.post('/ping', async (req, res) => {
                     encounter_count = encounters.encounter_count + 1,
                     last_seen_date = CURRENT_TIMESTAMP
                 RETURNING encounter_count;
-            `;
-            updates.push(db.query(encounterQuery, [userA, userB]));
-        }
+            `, [userA, userB]);
+        });
 
-        await Promise.all(updates);
+        const encounterResults = await Promise.all(updates);
+
+        // 5. Check if any encounters hit the suggestion threshold (3+)
+        const suggestions = encounterResults
+            .map((r, i) => ({
+                user: nearbyUsers[i],
+                count: r.rows[0]?.encounter_count
+            }))
+            .filter(e => e.count >= 3);
 
         res.json({
             success: true,
-            passedBy: nearbyUsers.rows
+            passedBy: nearbyUsers.map(u => ({ id: u.id, username: u.username })),
+            suggestions: suggestions.map(s => ({
+                id: s.user.id,
+                username: s.user.username,
+                encounterCount: s.count
+            }))
         });
 
     } catch (err) {

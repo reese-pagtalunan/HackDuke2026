@@ -452,11 +452,27 @@
         createdAt: new Date().toISOString()
       };
 
-      // Save to localStorage for now (replace with Firebase later)
-      localStorage.setItem('hifive_profile', JSON.stringify(profile));
+      // Save profile to backend
+      const response = await fetch('https://hifiveapp-7y7nb.ondigitalocean.app/api/user/profile', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          auth0_id: currentUser.sub,
+          first_name: firstName,
+          last_name: lastName,
+          interests: interests
+        })
+      });
 
-      // Simulate save delay
-      await new Promise(r => setTimeout(r, 900));
+      if (!response.ok) {
+          const err = await response.json();
+          console.error('Profile save failed:', err);
+          document.getElementById('loading').classList.remove('show');
+          alert('Failed to save profile. Please try again.');
+          return;
+      }
 
       // Hide loading, show success
       document.getElementById('loading').classList.remove('show');
