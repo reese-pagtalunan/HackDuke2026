@@ -1,10 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>HiFive 🤚 — Set Up Your Profile</title>
-  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap"
+    rel="stylesheet" />
   <script src="https://cdn.auth0.com/js/auth0-spa-js/2.0/auth0-spa-js.production.js"></script>
   <style>
     :root {
@@ -19,8 +22,15 @@
       --bg: #FAFBFF;
     }
 
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    html { scroll-behavior: smooth; }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
 
     body {
       font-family: 'DM Sans', sans-serif;
@@ -40,15 +50,31 @@
       background: var(--white);
       border-bottom: 1px solid rgba(26, 86, 255, 0.08);
     }
-    .nav-logo { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 1.3rem; color: var(--text); text-decoration: none; }
-    .nav-logo span { color: var(--blue); }
-    .nav-step { font-size: 0.82rem; color: var(--text-muted); font-weight: 500; }
+
+    .nav-logo {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: 1.3rem;
+      color: var(--text);
+      text-decoration: none;
+    }
+
+    .nav-logo span {
+      color: var(--blue);
+    }
+
+    .nav-step {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
 
     /* ─── PROGRESS ────────────────────────── */
     .progress-bar {
       height: 3px;
       background: var(--blue-light);
     }
+
     .progress-fill {
       height: 100%;
       background: var(--blue);
@@ -102,7 +128,10 @@
       margin-bottom: 8px;
       color: var(--text);
     }
-    .card h1 span { color: var(--blue); }
+
+    .card h1 span {
+      color: var(--blue);
+    }
 
     .card-sub {
       color: var(--text-muted);
@@ -145,11 +174,15 @@
       transition: border-color 0.2s, box-shadow 0.2s;
       width: 100%;
     }
+
     .field:focus {
       border-color: var(--blue);
       box-shadow: 0 0 0 3px rgba(26, 86, 255, 0.08);
     }
-    .field::placeholder { color: var(--text-muted); }
+
+    .field::placeholder {
+      color: var(--text-muted);
+    }
 
     textarea.field {
       resize: none;
@@ -171,6 +204,7 @@
       margin-top: 10px;
       min-height: 32px;
     }
+
     .tag {
       display: inline-flex;
       align-items: center;
@@ -184,10 +218,19 @@
       border-radius: 100px;
       animation: tag-in 0.2s ease;
     }
+
     @keyframes tag-in {
-      from { transform: scale(0.85); opacity: 0; }
-      to   { transform: scale(1); opacity: 1; }
+      from {
+        transform: scale(0.85);
+        opacity: 0;
+      }
+
+      to {
+        transform: scale(1);
+        opacity: 1;
+      }
     }
+
     .tag-remove {
       background: none;
       border: none;
@@ -199,7 +242,10 @@
       opacity: 0.6;
       transition: opacity 0.15s;
     }
-    .tag-remove:hover { opacity: 1; }
+
+    .tag-remove:hover {
+      opacity: 1;
+    }
 
     /* ─── SUBMIT ──────────────────────────── */
     .submit-btn {
@@ -220,11 +266,13 @@
       justify-content: center;
       gap: 8px;
     }
+
     .submit-btn:hover {
       background: var(--blue-accent);
       transform: translateY(-2px);
       box-shadow: 0 10px 28px rgba(26, 86, 255, 0.22);
     }
+
     .submit-btn:disabled {
       opacity: 0.5;
       cursor: not-allowed;
@@ -238,16 +286,24 @@
       text-align: center;
       padding: 20px 0;
     }
+
     .success-icon {
       font-size: 4rem;
       margin-bottom: 20px;
       display: block;
       animation: pop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
     }
+
     @keyframes pop {
-      from { transform: scale(0); }
-      to   { transform: scale(1); }
+      from {
+        transform: scale(0);
+      }
+
+      to {
+        transform: scale(1);
+      }
     }
+
     .success-screen h2 {
       font-family: 'Syne', sans-serif;
       font-size: 1.7rem;
@@ -256,13 +312,18 @@
       margin-bottom: 10px;
       color: var(--text);
     }
-    .success-screen h2 span { color: var(--blue); }
+
+    .success-screen h2 span {
+      color: var(--blue);
+    }
+
     .success-screen p {
       color: var(--text-muted);
       font-size: 0.92rem;
       line-height: 1.6;
       margin-bottom: 32px;
     }
+
     .home-btn {
       display: inline-flex;
       align-items: center;
@@ -277,7 +338,11 @@
       text-decoration: none;
       transition: all 0.2s;
     }
-    .home-btn:hover { background: var(--blue-accent); transform: translateY(-2px); }
+
+    .home-btn:hover {
+      background: var(--blue-accent);
+      transform: translateY(-2px);
+    }
 
     /* ─── LOADING OVERLAY ─────────────────── */
     .loading {
@@ -292,25 +357,49 @@
       flex-direction: column;
       gap: 16px;
     }
-    .loading.show { display: flex; }
+
+    .loading.show {
+      display: flex;
+    }
+
     .spinner {
-      width: 36px; height: 36px;
+      width: 36px;
+      height: 36px;
       border: 3px solid var(--blue-mid);
       border-top-color: var(--blue);
       border-radius: 50%;
       animation: spin 0.7s linear infinite;
     }
-    @keyframes spin { to { transform: rotate(360deg); } }
-    .loading p { font-size: 0.88rem; color: var(--text-muted); font-weight: 500; }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    .loading p {
+      font-size: 0.88rem;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
 
     /* ─── RESPONSIVE ──────────────────────── */
     @media (max-width: 560px) {
-      nav { padding: 16px 20px; }
-      .card { padding: 36px 24px; }
-      .form-row { grid-template-columns: 1fr; }
+      nav {
+        padding: 16px 20px;
+      }
+
+      .card {
+        padding: 36px 24px;
+      }
+
+      .form-row {
+        grid-template-columns: 1fr;
+      }
     }
   </style>
 </head>
+
 <body>
 
   <!-- Loading overlay -->
@@ -326,7 +415,9 @@
   </nav>
 
   <!-- PROGRESS -->
-  <div class="progress-bar"><div class="progress-fill" id="progress"></div></div>
+  <div class="progress-bar">
+    <div class="progress-fill" id="progress"></div>
+  </div>
 
   <!-- MAIN -->
   <main>
@@ -336,7 +427,8 @@
       <div id="form-state">
         <div class="step-badge">👋 Welcome to HiFive</div>
         <h1>Tell us about <span>yourself.</span></h1>
-        <p class="card-sub">This helps us find people with things in common with you. Your profile stays private until you make a connection.</p>
+        <p class="card-sub">This helps us find people with things in common with you. Your profile stays private until
+          you make a connection.</p>
 
         <form id="profile-form" onsubmit="return false;">
 
@@ -355,12 +447,9 @@
           <!-- Interests -->
           <div class="form-group" style="margin-top: 20px;">
             <label for="interests-input">Your interests</label>
-            <textarea
-              class="field"
-              id="interests-input"
+            <textarea class="field" id="interests-input"
               placeholder="I love hiking, indie music, photography, trying new coffee shops, chess, and sci-fi novels..."
-              required
-            ></textarea>
+              required></textarea>
             <span class="field-hint">Write freely — the more specific, the better your AI icebreakers will be.</span>
           </div>
 
@@ -384,7 +473,7 @@
 
   <script>
     // ── Auth0 config ───────────────────────────────────────
-    const AUTH0_DOMAIN    = 'dev-gnf25xr2lt37ohtu.us.auth0.com';
+    const AUTH0_DOMAIN = 'dev-gnf25xr2lt37ohtu.us.auth0.com';
     const AUTH0_CLIENT_ID = 'pOTTptqjjjExXAGuHaFXExOaVjgiWa4U';
 
     let auth0Client = null;
@@ -394,7 +483,7 @@
       auth0Client = await auth0.createAuth0Client({
         domain: AUTH0_DOMAIN,
         clientId: AUTH0_CLIENT_ID,
-        authorizationParams: { redirect_uri: 'https://reese-pagtalunan.github.io/HackDuke2026/hifive.html', audience: AUTH0_AUDIENCE }
+        authorizationParams: { redirect_uri: 'https://reese-pagtalunan.github.io/HackDuke2026/hifive.html', audience: 'https://hifive-api' }
       });
 
       if (location.search.includes('code=') || location.search.includes('error=')) {
@@ -412,8 +501,8 @@
       currentUser = await auth0Client.getUser();
 
       // Pre-fill name if Auth0 has it
-      if (currentUser.given_name)  document.getElementById('first-name').value = currentUser.given_name;
-      if (currentUser.family_name) document.getElementById('last-name').value  = currentUser.family_name;
+      if (currentUser.given_name) document.getElementById('first-name').value = currentUser.given_name;
+      if (currentUser.family_name) document.getElementById('last-name').value = currentUser.family_name;
     }
 
     // ── Progress bar animation on focus ───────────────────
@@ -423,18 +512,18 @@
     });
 
     function updateProgress() {
-      const first     = document.getElementById('first-name').value.trim();
-      const last      = document.getElementById('last-name').value.trim();
+      const first = document.getElementById('first-name').value.trim();
+      const last = document.getElementById('last-name').value.trim();
       const interests = document.getElementById('interests-input').value.trim();
-      const filled    = [first, last, interests].filter(Boolean).length;
-      const pct       = 50 + Math.round((filled / 3) * 50);
+      const filled = [first, last, interests].filter(Boolean).length;
+      const pct = 50 + Math.round((filled / 3) * 50);
       document.getElementById('progress').style.width = pct + '%';
     }
 
     // ── Form submit ────────────────────────────────────────
     document.getElementById('profile-form').addEventListener('submit', async () => {
       const firstName = document.getElementById('first-name').value.trim();
-      const lastName  = document.getElementById('last-name').value.trim();
+      const lastName = document.getElementById('last-name').value.trim();
       const interests = document.getElementById('interests-input').value.trim();
 
       if (!firstName || !lastName || !interests) return;
@@ -444,20 +533,27 @@
 
       // Build profile object
       const profile = {
-        userId:    currentUser ? currentUser.sub : 'demo-user',
-        email:     currentUser ? currentUser.email : '',
+        userId: currentUser ? currentUser.sub : 'demo-user',
+        email: currentUser ? currentUser.email : '',
         firstName,
         lastName,
         interests,
         createdAt: new Date().toISOString()
       };
 
-<<<<<<< HEAD
-      // Save profile to backend
+      const token = await auth0Client.getTokenSilently({
+        authorizationParams: {
+          audience: AUTH0_AUDIENCE
+        }
+      });
+
+      // Save to localStorage for now (replace with Firebase later)
+
       const response = await fetch('https://hifiveapp-7y7nb.ondigitalocean.app/api/user/profile', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify({
           auth0_id: currentUser.sub,
@@ -466,47 +562,27 @@
           interests: interests
         })
       });
-=======
-      const token = await auth0Client.getTokenSilently({
-        authorizationParams: {
-            audience: AUTH0_AUDIENCE
-        }
-      });
-
-      // Save to localStorage for now (replace with Firebase later)
-      const response = await fetch('https://hifiveapp-7y7nb.ondigitalocean.app//api/user/profile', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
-      },
-      body: JSON.stringify({
-        auth0_id: currentUser.sub,
-        first_name: firstName,
-        last_name: lastName,
-        interests: interests
-      })
-    });
 >>>>>>> e79a8174fc6ee98bd2a597711d9dacdc7ccd5bdd
 
       if (!response.ok) {
-          const err = await response.json();
-          console.error('Profile save failed:', err);
-          document.getElementById('loading').classList.remove('show');
-          alert('Failed to save profile. Please try again.');
-          return;
+        const err = await response.json();
+        console.error('Profile save failed:', err);
+        document.getElementById('loading').classList.remove('show');
+        alert('Failed to save profile. Please try again.');
+        return;
       }
 
       // Hide loading, show success
       document.getElementById('loading').classList.remove('show');
-      document.getElementById('form-state').style.display   = 'none';
+      document.getElementById('form-state').style.display = 'none';
       document.getElementById('success-state').style.display = 'block';
-      document.getElementById('success-name').textContent    = firstName;
-      document.getElementById('progress').style.width        = '100%';
+      document.getElementById('success-name').textContent = firstName;
+      document.getElementById('progress').style.width = '100%';
     });
 
     // ── Init ───────────────────────────────────────────────
     initAuth0();
   </script>
 </body>
+
 </html>

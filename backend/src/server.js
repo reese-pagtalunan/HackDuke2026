@@ -13,7 +13,12 @@ const app = express();
 const server = http.createServer(app);
 
 // Middlewares first
-app.use(cors());
+app.use(cors({
+    origin: 'https://reese-pagtalunan.github.io',
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization']
+}));
+app.options('*', cors());
 app.use(express.json());
 
 // Auth0 JWT checker
