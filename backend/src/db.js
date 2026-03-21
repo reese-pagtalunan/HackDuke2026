@@ -1,10 +1,10 @@
 const { Pool } = require('pg');
 require('dotenv').config();
 
-// Connect to DigitalOcean PostgreSQL or local DB
+console.log('DATABASE_URL starts with:', process.env.DATABASE_URL?.substring(0, 50));
+
 const pool = new Pool({
     connectionString: process.env.DATABASE_URL || 'postgresql://postgres:postgres@localhost:5432/proximitydb',
-    // SSL is usually required by DigitalOcean managed databases
     ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
 });
 
