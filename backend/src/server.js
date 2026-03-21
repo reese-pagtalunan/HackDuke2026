@@ -31,9 +31,9 @@ app.get('/health', (req, res) => {
 });
 
 // Protected routes
-app.use('/api/location', checkJwt, locationRoutes);
-app.use('/api/friends', checkJwt, friendsRoutes);
-app.use('/api/user', checkJwt, usersRoutes);
+app.use('/api/location', locationRoutes);
+app.use('/api/friends', friendsRoutes);
+app.use('/api/user', usersRoutes);
 
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
