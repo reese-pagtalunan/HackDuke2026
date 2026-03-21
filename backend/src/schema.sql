@@ -4,11 +4,7 @@ CREATE EXTENSION IF NOT EXISTS postgis;
 -- 1. Users Table
 CREATE TABLE IF NOT EXISTS users (
     id SERIAL PRIMARY KEY,
-    auth0_id VARCHAR(255) UNIQUE NOT NULL, -- Integrated with Auth0
-    username VARCHAR(100), -- Optional if using Auth0
-    first_name VARCHAR(100),
-    last_name VARCHAR(100),
-    interests TEXT,
+    username VARCHAR(100) UNIQUE NOT NULL,
     geom GEOMETRY(Point, 4326), -- PostGIS Point geometry (Longitude, Latitude)
     last_ping_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
