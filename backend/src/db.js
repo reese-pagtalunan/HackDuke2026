@@ -5,7 +5,7 @@ console.log('DATABASE_URL starts with:', process.env.DATABASE_URL?.substring(0, 
 
 const pool = new Pool({
     connectionString: process.env.DATABASE_URL || 'postgresql://postgres:postgres@localhost:5432/proximitydb',
-    ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
+    ssl: { rejectUnauthorized: false }
 });
 
 pool.on('error', (err) => {
