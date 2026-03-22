@@ -4,7 +4,6 @@ import Landing from './pages/Landing'
 import Dashboard from './pages/Dashboard'
 import Chat from './pages/Chat'
 import ProtectedRoute from './components/ProtectedRoute'
-import LocationTracker from './components/LocationTracker'
 
 function App() {
     const { isLoading } = useAuth0()
@@ -17,7 +16,6 @@ function App() {
 
     return (
         <BrowserRouter basename={import.meta.env.BASE_URL}>
-            <LocationTracker />
             <Routes>
                 <Route path="/" element={<Landing />} />
                 <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />

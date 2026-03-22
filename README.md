@@ -69,26 +69,6 @@ HiFive provides two distinct pathways for connection, both designed to end at th
 
 ---
 
-## How Proximity Detection Works
-
-```
-Phone A (you)          Backend                  Phone B (nearby user)
-     |                    |                            |
-     |-- POST /location/ping (lat, lng) -->            |
-     |                    |<-- POST /location/ping ----|
-     |                    |                            |
-     |          Haversine formula:                     |
-     |          distance(A, B) <= 50m?                 |
-     |                    |                            |
-     |          encounters.encounter_count++           |
-     |                    |                            |
-     |<-- suggestions sorted by encounter_count -------|
-```
-
-Every 30 seconds, each app silently sends its current GPS coordinates to the backend. The backend uses the **Haversine formula** to compute the distance between all recently-active users and records an encounter for any pair within 50 meters of each other. The **Suggestions** tab in the app then surfaces the people you've encountered the most — people you've physically been near, but may not have spoken to yet.
-
----
-
 ## AI Used to Build This
 
 This project was built with significant assistance from **Google Gemini** (via [Antigravity](https://antigravity.ai)), an AI coding agent. The AI contributed to:
