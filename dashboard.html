@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>HiFive 🤚 — Dashboard</title>
+  <meta name="description" content="Your HiFive dashboard — find people nearby and send HiFives." />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --blue: #1A56FF;
+      --blue-light: #E8EFFF;
+      --blue-soft: #F4F7FF;
+      --blue-mid: #B8CCFF;
+      --blue-accent: #4D7BFF;
+      --navy: #1C1F6E;
+      --text: #1A1F36;
+      --text-muted: #6B7394;
+      --white: #FFFFFF;
+      --bg: #FAFBFF;
+      --separator: rgba(26, 86, 255, 0.07);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      max-width: 480px;
+      margin: 0 auto;
+      box-shadow: 0 0 60px rgba(26, 86, 255, 0.08);
+    }
+
+    /* ─── STATUS BAR ────────────────────────── */
+    .status-bar {
+      background: var(--white);
+      padding: 12px 24px 8px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      color: var(--text);
+    }
+    .status-icons { display: flex; gap: 6px; align-items: center; font-size: 0.7rem; }
+
+    /* ─── HEADER ────────────────────────────── */
+    header {
+      background: var(--white);
+      border-bottom: 1px solid var(--separator);
+      padding: 14px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+    .header-back {
+      color: var(--text-muted);
+      font-size: 0.88rem;
+      font-weight: 500;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      transition: color 0.2s;
+    }
+    .header-back:hover { color: var(--blue); }
+    .header-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.05rem;
+      font-weight: 800;
+      color: var(--text);
+      letter-spacing: -0.3px;
+    }
+    .header-search {
+      width: 34px; height: 34px;
+      background: var(--blue-soft);
+      border: 1px solid var(--blue-mid);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer;
+      color: var(--blue-accent);
+      font-size: 0.9rem;
+      transition: background 0.2s;
+    }
+    .header-search:hover { background: var(--blue-light); }
+
+    /* ─── TABS ──────────────────────────────── */
+    .tabs {
+      background: var(--white);
+      display: flex;
+      border-bottom: 1px solid var(--separator);
+      padding: 0 20px;
+      gap: 0;
+    }
+    .tab {
+      flex: 1;
+      text-align: center;
+      padding: 12px 0;
+      font-size: 0.82rem;
+      font-weight: 500;
+      color: var(--text-muted);
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      transition: all 0.2s;
+      user-select: none;
+    }
+    .tab.active {
+      color: var(--navy);
+      font-weight: 700;
+      border-bottom-color: var(--navy);
+    }
+    .tab:hover:not(.active) { color: var(--text); }
+
+    /* ─── ALPHABET SIDEBAR ──────────────────── */
+    .content-area {
+      flex: 1;
+      display: flex;
+      position: relative;
+      overflow: hidden;
+    }
+    .people-list {
+      flex: 1;
+      overflow-y: auto;
+      padding-bottom: 100px;
+    }
+    .alpha-bar {
+      position: absolute;
+      right: 0;
+      top: 0;
+      bottom: 0;
+      width: 18px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 8px 0;
+      gap: 1px;
+    }
+    .alpha-char {
+      font-size: 0.6rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      cursor: pointer;
+      line-height: 1.6;
+      transition: color 0.15s;
+      user-select: none;
+    }
+    .alpha-char:hover { color: var(--blue); }
+
+    /* ─── SECTION HEADER ────────────────────── */
+    .section-letter {
+      padding: 10px 20px 4px;
+      font-size: 0.7rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      letter-spacing: 1px;
+      background: var(--bg);
+      border-bottom: 1px solid var(--separator);
+    }
+
+    /* ─── PERSON ROW ────────────────────────── */
+    .person-row {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 13px 20px;
+      background: var(--white);
+      border-bottom: 1px solid var(--separator);
+      transition: background 0.15s;
+    }
+    .person-row:hover { background: var(--blue-soft); }
+
+    .avatar {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--blue-light), var(--blue-mid));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: 1rem;
+      color: var(--blue);
+      flex-shrink: 0;
+      position: relative;
+    }
+    .avatar.selected {
+      background: var(--navy);
+      color: var(--white);
+    }
+    .avatar-check {
+      display: none;
+      position: absolute;
+      inset: 0;
+      border-radius: 50%;
+      background: var(--navy);
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 1rem;
+    }
+    .avatar.selected .avatar-check { display: flex; }
+    .avatar.selected .avatar-initials { display: none; }
+
+    .person-name {
+      flex: 1;
+      font-size: 0.92rem;
+      font-weight: 500;
+      color: var(--text);
+    }
+
+    .add-btn {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      border: none;
+      background: none;
+      color: var(--text-muted);
+      font-size: 1.2rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+      flex-shrink: 0;
+    }
+    .add-btn:hover { background: var(--blue-light); color: var(--blue); }
+
+    /* ─── FLOATING SEND BUTTON ──────────────── */
+    .send-bar {
+      position: fixed;
+      bottom: 80px;
+      left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      opacity: 0;
+      transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+      pointer-events: none;
+      z-index: 20;
+      width: calc(100% - 80px);
+      max-width: 400px;
+    }
+    .send-bar.visible {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+      pointer-events: all;
+    }
+    .send-btn {
+      width: 100%;
+      background: var(--navy);
+      color: var(--white);
+      border: none;
+      border-radius: 100px;
+      padding: 16px 24px;
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: 0.95rem;
+      cursor: pointer;
+      box-shadow: 0 8px 32px rgba(28, 31, 110, 0.35);
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+    .send-btn:hover { background: var(--blue); box-shadow: 0 12px 36px rgba(26, 86, 255, 0.35); }
+    .send-count {
+      background: rgba(255,255,255,0.25);
+      padding: 2px 8px;
+      border-radius: 100px;
+      font-size: 0.85rem;
+    }
+
+    /* ─── BOTTOM NAV ────────────────────────── */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 100%;
+      max-width: 480px;
+      background: var(--navy);
+      display: flex;
+      align-items: center;
+      justify-content: space-around;
+      padding: 14px 0 20px;
+      z-index: 30;
+    }
+    .nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      cursor: pointer;
+      opacity: 0.5;
+      transition: opacity 0.2s;
+    }
+    .nav-item.active { opacity: 1; }
+    .nav-item svg { width: 22px; height: 22px; fill: none; stroke: white; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+    .nav-label { font-size: 0.6rem; font-weight: 600; letter-spacing: 0.5px; color: rgba(255,255,255,0.8); }
+
+    /* ─── EMPTY STATE ───────────────────────── */
+    .empty-tab {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 80px 32px;
+      text-align: center;
+      color: var(--text-muted);
+    }
+    .empty-tab-icon { font-size: 3rem; margin-bottom: 16px; }
+    .empty-tab-title { font-family: 'Syne', sans-serif; font-size: 1.1rem; font-weight: 800; color: var(--text); margin-bottom: 8px; }
+    .empty-tab-sub { font-size: 0.85rem; line-height: 1.6; }
+  </style>
+</head>
+
+<body>
+
+  <!-- HEADER -->
+  <header>
+    <a href="hifive.html" class="header-back">← Home</a>
+    <span class="header-title">Friends</span>
+    <div class="header-search" title="Search">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    </div>
+  </header>
+
+  <!-- TABS -->
+  <div class="tabs">
+    <div class="tab" id="tab-followers" onclick="switchTab('followers')">Followers</div>
+    <div class="tab" id="tab-following" onclick="switchTab('following')">Following</div>
+    <div class="tab active" id="tab-invite" onclick="switchTab('invite')">Invite</div>
+  </div>
+
+  <!-- CONTENT AREA -->
+  <div class="content-area">
+    <div class="people-list" id="people-list">
+      <!-- Populated by JS -->
+    </div>
+
+    <!-- Alphabetical sidebar -->
+    <div class="alpha-bar" id="alpha-bar"></div>
+  </div>
+
+  <!-- FLOATING SEND BAR -->
+  <div class="send-bar" id="send-bar">
+    <button class="send-btn" id="send-btn" onclick="sendInvites()">
+      Send HiFives <span class="send-count" id="send-count">0</span>
+    </button>
+  </div>
+
+  <!-- BOTTOM NAV -->
+  <nav class="bottom-nav">
+    <div class="nav-item" onclick="window.location='hifive.html'">
+      <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg>
+      <span class="nav-label">Home</span>
+    </div>
+    <div class="nav-item active">
+      <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+      <span class="nav-label">Friends</span>
+    </div>
+    <div class="nav-item">
+      <svg viewBox="0 0 24 24"><polygon points="3,11 22,2 13,21 11,13 3,11"/></svg>
+      <span class="nav-label">Nearby</span>
+    </div>
+    <div class="nav-item">
+      <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      <span class="nav-label">Profile</span>
+    </div>
+  </nav>
+
+  <script>
+    // ── Dummy data (replace with real API later) ─────────────
+    const people = [
+      { name: 'Alicia Davis' },
+      { name: 'Alexander Lewis' },
+      { name: 'Anna Anderson' },
+      { name: 'Antonio Canavaro' },
+      { name: 'Arnold Green' },
+      { name: 'Bianca Martin' },
+      { name: 'Brandon Gray' },
+      { name: 'Brooke Simmons' },
+      { name: 'Carlos Rivera' },
+      { name: 'Chloe Thompson' },
+      { name: 'Daniel Park' },
+      { name: 'Diana Flores' },
+      { name: 'Ethan Wright' },
+      { name: 'Eva Hernandez' },
+      { name: 'Felix Nguyen' },
+      { name: 'Grace Kim' },
+      { name: 'Henry Scott' },
+      { name: 'Isabella Clark' },
+      { name: 'James Wilson' },
+      { name: 'Jasmine Hall' },
+      { name: 'Kevin Moore' },
+      { name: 'Laura Adams' },
+      { name: 'Marcus Johnson' },
+      { name: 'Maya Patel' },
+      { name: 'Noah Baker' },
+      { name: 'Olivia Carter' },
+      { name: 'Patrick Lee' },
+      { name: 'Quinn Walker' },
+      { name: 'Rachel Turner' },
+      { name: 'Samuel Young' },
+    ];
+
+    const selected = new Set();
+
+    function getInitials(name) {
+      return name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase();
+    }
+
+    function groupByLetter(arr) {
+      const groups = {};
+      arr.forEach(p => {
+        const letter = p.name[0].toUpperCase();
+        if (!groups[letter]) groups[letter] = [];
+        groups[letter].push(p);
+      });
+      return groups;
+    }
+
+    function toggleSelect(name, avatarEl, rowEl) {
+      if (selected.has(name)) {
+        selected.delete(name);
+        avatarEl.classList.remove('selected');
+        rowEl.classList.remove('row-selected');
+      } else {
+        selected.add(name);
+        avatarEl.classList.add('selected');
+        rowEl.classList.add('row-selected');
+      }
+      updateSendBar();
+    }
+
+    function updateSendBar() {
+      const bar = document.getElementById('send-bar');
+      const count = document.getElementById('send-count');
+      count.textContent = selected.size;
+      if (selected.size > 0) {
+        bar.classList.add('visible');
+        const btn = document.getElementById('send-btn');
+        btn.childNodes[0].textContent = 'Send HiFives ';
+      } else {
+        bar.classList.remove('visible');
+      }
+    }
+
+    function renderInviteList() {
+      const list = document.getElementById('people-list');
+      list.innerHTML = '';
+      const groups = groupByLetter(people);
+      const letters = Object.keys(groups).sort();
+
+      letters.forEach(letter => {
+        // Section header
+        const header = document.createElement('div');
+        header.className = 'section-letter';
+        header.id = 'section-' + letter;
+        header.textContent = letter;
+        list.appendChild(header);
+
+        groups[letter].forEach(person => {
+          const row = document.createElement('div');
+          row.className = 'person-row';
+
+          const avatar = document.createElement('div');
+          avatar.className = 'avatar' + (selected.has(person.name) ? ' selected' : '');
+          avatar.innerHTML = `
+            <span class="avatar-initials">${getInitials(person.name)}</span>
+            <span class="avatar-check">✓</span>
+          `;
+          avatar.addEventListener('click', () => toggleSelect(person.name, avatar, row));
+
+          const nameEl = document.createElement('div');
+          nameEl.className = 'person-name';
+          nameEl.textContent = person.name;
+
+          const btn = document.createElement('button');
+          btn.className = 'add-btn';
+          btn.innerHTML = '+';
+          btn.title = 'Invite ' + person.name;
+          btn.addEventListener('click', () => toggleSelect(person.name, avatar, row));
+
+          row.appendChild(avatar);
+          row.appendChild(nameEl);
+          row.appendChild(btn);
+          list.appendChild(row);
+        });
+      });
+
+      // Build alpha sidebar
+      const alphaBar = document.getElementById('alpha-bar');
+      alphaBar.innerHTML = '';
+      letters.forEach(letter => {
+        const span = document.createElement('span');
+        span.className = 'alpha-char';
+        span.textContent = letter;
+        span.addEventListener('click', () => {
+          const section = document.getElementById('section-' + letter);
+          if (section) section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        });
+        alphaBar.appendChild(span);
+      });
+    }
+
+    function renderEmptyTab(icon, title, sub) {
+      const list = document.getElementById('people-list');
+      list.innerHTML = `
+        <div class="empty-tab">
+          <div class="empty-tab-icon">${icon}</div>
+          <div class="empty-tab-title">${title}</div>
+          <p class="empty-tab-sub">${sub}</p>
+        </div>
+      `;
+      document.getElementById('alpha-bar').innerHTML = '';
+    }
+
+    function switchTab(tab) {
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      document.getElementById('tab-' + tab).classList.add('active');
+
+      if (tab === 'invite') {
+        renderInviteList();
+      } else if (tab === 'followers') {
+        renderEmptyTab('👋', 'No followers yet', 'When someone HiFives you back, they\'ll appear here.');
+      } else if (tab === 'following') {
+        renderEmptyTab('🤚', 'Not following anyone yet', 'Start by sending HiFives to people you\'d like to connect with.');
+      }
+    }
+
+    function sendInvites() {
+      const names = [...selected];
+      alert(`HiFive sent to: ${names.join(', ')} 🤚`);
+      selected.clear();
+      renderInviteList();
+      updateSendBar();
+    }
+
+    // ── Init ──────────────────────────────────
+    switchTab('invite');
+  </script>
+</body>
+</html>
