@@ -15,13 +15,16 @@ export default function Friends() {
         async function load() {
             try {
                 const token = await getAccessTokenSilently()
-                const res = await fetch(`${API_URL}/api/friends/${user.sub}/list`, {
+                console.log('token:', token ? 'YES' : 'NO')
+                const res = await fetch(`${API_URL}/api/friends/${encodeURIComponent(user.sub)}/list`, {
                     headers: { Authorization: `Bearer ${token}` }
                 })
+                console.log('friends status:', res.status)
                 const data = await res.json()
+                console.log('friends data:', data)
                 setFriends(data.friends || [])
                 setSuggestions(data.suggestions || [])
-            } catch (err) { console.error(err) }
+            } catch (err) { console.error('friends error:', err) }
         }
         load()
     }, [])
