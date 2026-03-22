@@ -19,7 +19,7 @@ export default function Navbar() {
                         <Link to="/friends" className="text-sm text-gray-500 hover:text-gray-800 transition-colors no-underline">Friends</Link>
                         <button
                             className="text-sm text-gray-400 hover:text-brand transition-colors bg-none border-none cursor-pointer font-sans"
-                            onClick={() => logout({ logoutParams: { returnTo: window.location.origin } })}
+                            onClick={() => logout({ logoutParams: { returnTo: window.location.origin + import.meta.env.BASE_URL } })}
                         >
                             Log out
                         </button>
