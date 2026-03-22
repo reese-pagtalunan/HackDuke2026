@@ -61,4 +61,27 @@ router.get('/profile/:auth0_id', async (req, res) => {
     }
 });
 
+/**
+ * @route   GET /api/user/search
+ * @desc    Search for users by name
+ */
+router.get('/search', async (req, res) => {
+    const { q } = req.query;
+    if (!q) return res.json({ users: [] });
+
+    try {
+        const query = `
+            SELECT id, auth0_id, first_name, last_name 
+            FROM users 
+            WHERE first_name ILIKE $1 OR last_name ILIKE $1
+            LIMIT 20
+        `;
+        const result = await db.query(query, [`%${q}%`]);
+        res.json({ success: true, users: result.rows });
+    } catch (err) {
+        console.error('Search error:', err);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
 module.exports = router;

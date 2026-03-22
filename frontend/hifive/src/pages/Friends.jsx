@@ -11,6 +11,9 @@ export default function Friends() {
     const [suggestions, setSuggestions] = useState([])
     const [requests, setRequests]       = useState([])
     const [requested, setRequested]     = useState(new Set())
+    const [searchQuery, setSearchQuery] = useState('')
+    const [searchResults, setSearchResults] = useState([])
+    const [isSearching, setIsSearching] = useState(false)
 
     useEffect(() => {
         async function load() {
@@ -67,6 +70,26 @@ export default function Friends() {
             })
             setRequests(prev => prev.filter(r => r.auth0_id !== requesterAuth0Id))
         } catch (err) { console.error('Decline error:', err) }
+    }
+
+    const handleSearch = async (e) => {
+        const q = e.target.value
+        setSearchQuery(q)
+        if (q.length < 2) {
+            setSearchResults([])
+            setIsSearching(false)
+            return
+        }
+        setIsSearching(true)
+        try {
+            const token = await getAccessTokenSilently()
+            const res = await fetch(`${API_URL}/api/user/search?q=${encodeURIComponent(q)}`, {
+                headers: { Authorization: `Bearer ${token}` }
+            })
+            const data = await res.json()
+            setSearchResults(data.users || [])
+        } catch (err) { console.error('Search error:', err) }
+        finally { setIsSearching(false) }
     }
 
     const [activeTab, setActiveTab] = useState('friends')
@@ -154,10 +177,27 @@ export default function Friends() {
 
                 {activeTab === 'search' && (
                     <div className="animate-fade-up">
-                        <h2 className="font-display font-bold text-lg text-gray-700 mb-4">Search & Suggestions 👋</h2>
-                        {suggestions.length > 0 ? (
+                        <div className="flex flex-col gap-4 mb-6">
+                            <h2 className="font-display font-bold text-lg text-gray-700">Find Someone 👋</h2>
+                            <div className="relative">
+                                <input 
+                                    type="text"
+                                    className="input-field pl-10 !rounded-full"
+                                    placeholder="Search by name (e.g. 'John')..."
+                                    value={searchQuery}
+                                    onChange={handleSearch}
+                                />
+                                <span className="absolute left-4 top-1/2 -translate-y-1/2 opacity-30">🔍</span>
+                                {isSearching && <span className="absolute right-4 top-1/2 -translate-y-1/2 text-xs animate-pulse text-brand">searching...</span>}
+                            </div>
+                        </div>
+
+                        {(searchQuery.length >= 2 ? searchResults : suggestions).length > 0 ? (
                             <div className="flex flex-col gap-3">
-                                {suggestions.map(s => (
+                                <p className="text-[0.7rem] uppercase tracking-widest font-bold text-gray-400 mb-1">
+                                    {searchQuery.length >= 2 ? `Search Results (${searchResults.length})` : 'Recent Encounters & Suggestions'}
+                                </p>
+                                {(searchQuery.length >= 2 ? searchResults : suggestions).map(s => (
                                     <div key={s.id} className="card flex items-center justify-between px-6 py-5 border border-brand/5 shadow-sm">
                                         <div className="flex items-center gap-3">
                                             <div className="w-10 h-10 rounded-full bg-brand-light flex items-center justify-center text-brand font-bold uppercase">
@@ -165,7 +205,7 @@ export default function Friends() {
                                             </div>
                                             <div>
                                                 <p className="font-semibold text-gray-900">{s.first_name} {s.last_name}</p>
-                                                <p className="text-xs text-gray-400">Passed each other {s.encounter_count} times</p>
+                                                {s.encounter_count && <p className="text-xs text-gray-400">Passed each other {s.encounter_count} times</p>}
                                             </div>
                                         </div>
                                         <button
@@ -180,7 +220,10 @@ export default function Friends() {
                             </div>
                         ) : (
                             <div className="text-center py-10">
-                                <p className="text-gray-400">No suggestions found.</p>
+                                <span className="text-4xl block mb-3 opacity-30">{searchQuery.length >= 2 ? '🕵️' : '🤚'}</span>
+                                <p className="text-gray-400">
+                                    {searchQuery.length >= 2 ? `No users found matching "${searchQuery}"` : 'No suggestions found yet.'}
+                                </p>
                             </div>
                         )}
                     </div>
