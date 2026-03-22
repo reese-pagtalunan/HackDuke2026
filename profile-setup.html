@@ -405,7 +405,7 @@
       const isLoggedIn = await auth0Client.isAuthenticated();
       if (!isLoggedIn) {
         // Not logged in — redirect to main page
-        window.location.href = 'hifive.html';
+        window.location.href = "dashboard.html";
         return;
       }
 
@@ -495,6 +495,9 @@
       document.getElementById('success-state').style.display = 'block';
       document.getElementById('success-name').textContent    = firstName;
       document.getElementById('progress').style.width        = '100%';
+
+      // Redirect to dashboard after 2 seconds
+      setTimeout(() => { window.location.href = 'dashboard.html'; }, 2000);
     });
 
     // ── Init ───────────────────────────────────────────────
