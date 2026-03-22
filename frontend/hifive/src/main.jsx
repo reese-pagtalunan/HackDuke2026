@@ -10,7 +10,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
             domain="dev-gnf25xr2lt37ohtu.us.auth0.com"
             clientId="pOTTptqjjjExXAGuHaFXExOaVjgiWa4U"
             authorizationParams={{
-                redirect_uri: window.location.origin,
+                redirect_uri: window.location.origin + import.meta.env.BASE_URL,
                 audience: 'https://hifive-api'
             }}
         >
