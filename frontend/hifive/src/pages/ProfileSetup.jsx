@@ -45,9 +45,9 @@ export default function ProfileSetup() {
     }
 
     return (
-        <div className="w-full flex items-center justify-center">
-            <div className="card p-8 md:p-14 max-w-lg w-full animate-fade-up bg-white border border-brand/10 shadow-sm md:rounded-2xl">
-                <div className="text-center mb-8">
+        <div className="w-full">
+            <div className="card p-6 md:p-14 max-w-lg mx-auto animate-fade-up bg-white border border-brand/10 shadow-sm rounded-2xl md:rounded-3xl">
+                <div className="text-center mb-6 md:mb-8">
                     <div className="w-20 h-20 rounded-full mx-auto bg-gradient-to-br from-brand-light to-brand-mid flex items-center justify-center text-brand font-display font-bold text-3xl mb-4">
                         {firstName?.[0] || ''}{lastName?.[0] || ''}
                     </div>

@@ -16,15 +16,16 @@ export default function Navbar() {
                 <li><a href="/#principles" className="text-gray-500 hover:text-gray-900 text-[0.9rem] font-medium transition-colors no-underline">Why HiFive</a></li>
             </ul>
 
-            <div className="flex items-center gap-2.5 md:gap-4">
+            <div className="flex items-center gap-2 md:gap-4">
                 {isAuthenticated ? (
                     <>
-                        {user?.picture && (
-                            <img src={user.picture} alt="avatar" className="w-[34px] h-[34px] rounded-full border-2 border-brand-mid object-cover hidden sm:block" />
-                        )}
-                        <span className="text-[0.88rem] font-semibold text-gray-900 hidden sm:block">{user?.given_name || user?.name}</span>
-                        <Link to="/friends" className="text-sm text-gray-500 hover:text-gray-800 transition-colors no-underline hidden sm:block">Friends</Link>
-                        <Link to="/dashboard" className="text-[0.82rem] font-bold text-brand hover:text-brand-accent transition-colors no-underline mx-2">Dashboard</Link>
+                        <div className="hidden sm:flex items-center gap-3">
+                            {user?.picture && (
+                                <img src={user.picture} alt="avatar" className="w-[34px] h-[34px] rounded-full border-2 border-brand-mid object-cover" />
+                            )}
+                            <span className="text-[0.88rem] font-semibold text-gray-900">{user?.given_name || user?.name}</span>
+                        </div>
+                        <Link to="/dashboard" className="text-[0.82rem] font-bold text-brand hover:text-brand-accent transition-colors no-underline mx-1 md:mx-2">Dashboard</Link>
                         <button
                             className="text-[0.82rem] text-gray-400 hover:text-brand transition-colors bg-transparent border-none cursor-pointer font-sans"
                             onClick={() => logout({ logoutParams: { returnTo: window.location.origin + import.meta.env.BASE_URL } })}

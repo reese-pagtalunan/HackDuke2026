@@ -83,8 +83,8 @@ export default function Chat() {
     return (
         <div className="min-h-screen bg-brand-soft font-sans flex flex-col">
             <Navbar />
-            <div className="flex-1 flex items-center justify-center p-4 pt-[90px] md:pt-[110px] pb-10">
-                <main className="card flex flex-col w-full max-w-2xl h-[75vh] min-h-[500px] max-h-[800px] bg-white border border-brand/10 shadow-xl md:rounded-[32px] overflow-hidden">
+            <div className="flex-1 flex items-center justify-center p-3 sm:p-4 pt-[80px] md:pt-[110px] pb-5 sm:pb-10">
+                <main className="card flex flex-col w-full max-w-2xl h-[calc(100dvh-100px)] md:h-[75vh] md:min-h-[500px] md:max-h-[800px] bg-white border border-brand/10 shadow-xl rounded-[24px] md:rounded-[32px] overflow-hidden">
                     {/* Header could go here, but Navbar handles global back/nav */}
                     
                     <div className="flex-1 flex flex-col gap-3 overflow-y-auto p-6 md:p-8 bg-brand-soft/30">
