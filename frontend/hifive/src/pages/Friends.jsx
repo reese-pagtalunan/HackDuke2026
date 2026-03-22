@@ -61,10 +61,10 @@ export default function Friends() {
                                     </div>
                                     <button
                                         className="btn-primary px-5 py-2.5 text-sm disabled:opacity-50"
-                                        onClick={() => sendRequest(s.id)}
-                                        disabled={requested.has(s.id)}
+                                        onClick={() => sendRequest(s.auth0_id)}
+                                        disabled={requested.has(s.auth0_id)}
                                     >
-                                        {requested.has(s.id) ? 'Sent ✓' : 'HiFive 🤚'}
+                                        {requested.has(s.auth0_id) ? 'Sent ✓' : 'HiFive 🤚'}
                                     </button>
                                 </div>
                             ))}

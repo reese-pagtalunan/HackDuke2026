@@ -73,11 +73,6 @@ router.get('/:userId/list', async (req, res) => {
             SELECT u.id, u.auth0_id, u.first_name, u.last_name, 5 as encounter_count
             FROM users u
             WHERE u.id != $1
-              AND u.id NOT IN (
-                  SELECT addressee_id FROM friendships WHERE requester_id = $1 AND status = 'accepted'
-                  UNION
-                  SELECT requester_id FROM friendships WHERE addressee_id = $1 AND status = 'accepted'
-              )
             LIMIT 50
         `;
         const encountersRes = await db.query(encountersQuery, [numericId]);
