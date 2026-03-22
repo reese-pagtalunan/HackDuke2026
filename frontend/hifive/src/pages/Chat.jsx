@@ -17,7 +17,7 @@ export default function Chat() {
 
     useEffect(() => {
         socketRef.current = io(API_URL, {
-            transports: ['polling', 'websocket']
+            transports: ['websocket']
         })
         socketRef.current.on('connect', () => {
             console.log('Socket connected, identifying as:', user.sub)
