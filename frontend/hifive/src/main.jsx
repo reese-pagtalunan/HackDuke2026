@@ -1,0 +1,20 @@
+import React from 'react'
+import ReactDOM from 'react-dom/client'
+import { Auth0Provider } from '@auth0/auth0-react'
+import App from './App'
+import './index.css'
+
+ReactDOM.createRoot(document.getElementById('root')).render(
+    <React.StrictMode>
+        <Auth0Provider
+            domain="dev-gnf25xr2lt37ohtu.us.auth0.com"
+            clientId="pOTTptqjjjExXAGuHaFXExOaVjgiWa4U"
+            authorizationParams={{
+                redirect_uri: window.location.origin,
+                audience: 'https://hifive-api'
+            }}
+        >
+            <App />
+        </Auth0Provider>
+    </React.StrictMode>
+)
