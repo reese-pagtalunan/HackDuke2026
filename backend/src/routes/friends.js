@@ -19,9 +19,9 @@ router.post('/request', async (req, res) => {
 
         const result = await db.query(`
             INSERT INTO friendships (requester_id, addressee_id, status)
-            VALUES ($1, $2, 'pending')
+            VALUES ($1, $2, 'accepted')
             ON CONFLICT (requester_id, addressee_id)
-            DO UPDATE SET status = 'pending'
+            DO UPDATE SET status = 'accepted'
             RETURNING *
         `, [rId, aId]);
         res.json({ success: true, friendship: result.rows[0] });
@@ -68,15 +68,17 @@ router.get('/:userId/list', async (req, res) => {
         `;
         const friendsRes = await db.query(friendQuery, [numericId]);
 
-        // Suggestions — encountered 3+ times
+        // Suggestions — all other users not yet friends
         const encountersQuery = `
-            SELECT u.id, u.auth0_id, u.first_name, u.last_name, e.encounter_count
-            FROM encounters e
-            JOIN users u ON (e.user_a_id = u.id OR e.user_b_id = u.id)
-            WHERE (e.user_a_id = $1 OR e.user_b_id = $1)
-              AND u.id != $1
-              AND e.encounter_count >= 3
-              AND e.last_seen_date > CURRENT_TIMESTAMP - INTERVAL '7 days'
+            SELECT u.id, u.auth0_id, u.first_name, u.last_name, 5 as encounter_count
+            FROM users u
+            WHERE u.id != $1
+              AND u.id NOT IN (
+                  SELECT addressee_id FROM friendships WHERE requester_id = $1 AND status = 'accepted'
+                  UNION
+                  SELECT requester_id FROM friendships WHERE addressee_id = $1 AND status = 'accepted'
+              )
+            LIMIT 50
         `;
         const encountersRes = await db.query(encountersQuery, [numericId]);
 
