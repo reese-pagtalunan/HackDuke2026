@@ -4,7 +4,7 @@ require('dotenv').config();
 console.log('DATABASE_URL starts with:', process.env.DATABASE_URL?.substring(0, 50));
 
 const pool = new Pool({
-    connectionString: process.env.DATABASE_URL || 'postgresql://postgres:postgres@localhost:5432/proximitydb',
+    connectionString: process.env.DATABASE_URL,
     ssl: { rejectUnauthorized: false }
 });
 
