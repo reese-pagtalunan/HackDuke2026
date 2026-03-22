@@ -76,9 +76,9 @@ export default function Friends() {
                             {friends.map(f => (
                                 <div key={f.id} className="card flex items-center justify-between px-6 py-5">
                                     <p className="font-semibold text-gray-900">{f.first_name} {f.last_name}</p>
-                                    <Link to={`/chat/${f.id}`} className="btn-primary px-5 py-2.5 text-sm no-underline">
-                                        Message 💬
-                                    </Link>
+                                        <Link to={`/chat/${encodeURIComponent(f.auth0_id)}`} className="btn-primary px-5 py-2.5 text-sm no-underline">
+                                            Message 💬
+                                        </Link>
                                 </div>
                             ))}
                         </div>
