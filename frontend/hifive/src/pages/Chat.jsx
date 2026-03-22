@@ -83,55 +83,61 @@ export default function Chat() {
     return (
         <div className="min-h-screen bg-brand-soft font-sans flex flex-col">
             <Navbar />
-            <main className="flex-1 max-w-2xl w-full mx-auto px-6 py-6 flex flex-col">
-                <div className="flex-1 flex flex-col gap-3 mb-4 overflow-y-auto min-h-[400px]">
-
-                    {/* Icebreaker card — shows only when no messages yet */}
-                    {icebreaker && messages.length === 0 && (
-                        <div className="card p-6 text-center border-brand/20 mb-2">
-                            <span className="text-xs font-bold uppercase tracking-widest text-brand block mb-2">
-                                ✨ AI Icebreaker
-                            </span>
-                            <p className="text-gray-700 font-medium">{icebreaker}</p>
-                            <p className="text-xs text-gray-400 mt-2">Use this to break the ice!</p>
-                        </div>
-                    )}
-
-                    {messages.length === 0 && !icebreaker && (
-                        <div className="flex-1 flex items-center justify-center">
-                            <div className="text-center">
-                                <span className="text-4xl block mb-3">💬</span>
-                                <p className="text-gray-400 text-sm">Start the conversation!</p>
+            <div className="flex-1 flex items-center justify-center p-4 pt-[90px] md:pt-[110px] pb-10">
+                <main className="card flex flex-col w-full max-w-2xl h-[75vh] min-h-[500px] max-h-[800px] bg-white border border-brand/10 shadow-xl md:rounded-[32px] overflow-hidden">
+                    {/* Header could go here, but Navbar handles global back/nav */}
+                    
+                    <div className="flex-1 flex flex-col gap-3 overflow-y-auto p-6 md:p-8 bg-brand-soft/30">
+                        {/* Icebreaker card — shows only when no messages yet */}
+                        {icebreaker && messages.length === 0 && (
+                            <div className="bg-brand-light/40 rounded-2xl p-6 text-center border border-brand/20 mb-2">
+                                <span className="text-xs font-bold uppercase tracking-widest text-brand block mb-2">
+                                    ✨ AI Icebreaker
+                                </span>
+                                <p className="text-gray-700 font-medium">{icebreaker}</p>
+                                <p className="text-xs text-gray-400 mt-2">Use this to break the ice!</p>
                             </div>
-                        </div>
-                    )}
+                        )}
 
-                    {messages.map((m, i) => (
-                        <div key={i} className={`flex ${m.senderId === user.sub ? 'justify-end' : 'justify-start'}`}>
-                            <div className={`px-4 py-3 rounded-2xl max-w-xs text-sm ${
-                                m.senderId === user.sub
-                                    ? 'bg-brand text-white'
-                                    : 'bg-white border border-brand/10 text-gray-800'
-                            }`}>
-                                {m.content}
+                        {messages.length === 0 && !icebreaker && (
+                            <div className="flex-1 flex items-center justify-center">
+                                <div className="text-center">
+                                    <span className="text-4xl block mb-3 opacity-50">💬</span>
+                                    <p className="text-gray-400 text-sm font-medium uppercase tracking-widest">Start the conversation</p>
+                                </div>
                             </div>
+                        )}
+
+                        {messages.map((m, i) => (
+                            <div key={i} className={`flex ${m.senderId === user.sub ? 'justify-end' : 'justify-start'}`}>
+                                <div className={`px-5 py-3 rounded-2xl max-w-[85%] sm:max-w-xs text-[0.95rem] shadow-sm ${
+                                    m.senderId === user.sub
+                                        ? 'bg-brand text-white rounded-br-sm'
+                                        : 'bg-white border border-brand/10 text-gray-800 rounded-bl-sm'
+                                }`}>
+                                    {m.content}
+                                </div>
+                            </div>
+                        ))}
+                        <div ref={bottomRef} />
+                    </div>
+
+                    <div className="p-4 md:p-6 bg-white border-t border-brand/5">
+                        <div className="flex gap-3">
+                            <input
+                                className="input-field flex-1 !rounded-full !bg-brand-soft/50"
+                                value={input}
+                                onChange={e => setInput(e.target.value)}
+                                onKeyDown={e => e.key === 'Enter' && sendMessage()}
+                                placeholder="Say something..."
+                            />
+                            <button className="btn-primary px-6 py-3 text-sm font-bold tracking-wide shadow-md" onClick={sendMessage}>
+                                Send 🤚
+                            </button>
                         </div>
-                    ))}
-                    <div ref={bottomRef} />
-                </div>
-                <div className="flex gap-3">
-                    <input
-                        className="input-field flex-1"
-                        value={input}
-                        onChange={e => setInput(e.target.value)}
-                        onKeyDown={e => e.key === 'Enter' && sendMessage()}
-                        placeholder="Say something..."
-                    />
-                    <button className="btn-primary px-6 py-3 text-sm" onClick={sendMessage}>
-                        Send 🤚
-                    </button>
-                </div>
-            </main>
+                    </div>
+                </main>
+            </div>
         </div>
     )
 }

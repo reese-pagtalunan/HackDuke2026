@@ -1,9 +1,7 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { useAuth0 } from '@auth0/auth0-react'
 import Landing from './pages/Landing'
-import ProfileSetup from './pages/ProfileSetup'
 import Dashboard from './pages/Dashboard'
-import Friends from './pages/Friends'
 import Chat from './pages/Chat'
 import ProtectedRoute from './components/ProtectedRoute'
 
@@ -20,9 +18,7 @@ function App() {
         <BrowserRouter basename={import.meta.env.BASE_URL}>
             <Routes>
                 <Route path="/" element={<Landing />} />
-                <Route path="/setup" element={<ProtectedRoute><ProfileSetup /></ProtectedRoute>} />
                 <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-                <Route path="/friends" element={<ProtectedRoute><Friends /></ProtectedRoute>} />
                 <Route path="/chat/:friendId" element={<ProtectedRoute><Chat /></ProtectedRoute>} />
             </Routes>
         </BrowserRouter>
