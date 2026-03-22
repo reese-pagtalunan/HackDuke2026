@@ -1,0 +1,68 @@
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap');
+@import "tailwindcss";
+
+@theme {
+    --color-brand: #1A56FF;
+    --color-brand-light: #E8EFFF;
+    --color-brand-soft: #F4F7FF;
+    --color-brand-mid: #B8CCFF;
+    --color-brand-accent: #4D7BFF;
+    --color-navy: #0F172A;
+    --color-navy-light: #1E293B;
+    --font-sans: 'DM Sans', sans-serif;
+    --font-display: 'Syne', sans-serif;
+    --animate-pulse-slow: pulse-slow 5s ease-in-out infinite;
+    --animate-pulse-reverse: pulse-slow 6s ease-in-out infinite reverse;
+    --animate-blink: blink 1.5s ease-in-out infinite;
+    --animate-scroll-down: scroll-down 2s ease-in-out infinite;
+    --animate-fade-up: fade-up 0.6s ease forwards;
+    --animate-bounce-soft: bounce-soft 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse-slow {
+    0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+    50% { transform: translate(-50%, -50%) scale(1.15); opacity: 0.5; }
+}
+
+@keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.2; }
+}
+
+@keyframes scroll-down {
+    0% { transform: scaleY(0); transform-origin: top; }
+    50% { transform: scaleY(1); transform-origin: top; }
+    51% { transform: scaleY(1); transform-origin: bottom; }
+    100% { transform: scaleY(0); transform-origin: bottom; }
+}
+
+@keyframes fade-up {
+    from { opacity: 0; transform: translateY(24px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes bounce-soft {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-4px); }
+}
+
+@layer base {
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body { font-family: 'DM Sans', sans-serif; background: #FAFBFF; color: #1A1F36; }
+}
+
+@layer components {
+    .btn-primary {
+        @apply bg-brand text-white font-bold rounded-full border-none cursor-pointer transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg;
+    }
+    .btn-secondary {
+        @apply bg-white text-gray-800 font-bold rounded-full border border-brand/20 cursor-pointer transition-all duration-200 hover:-translate-y-0.5;
+    }
+    .input-field {
+        @apply bg-brand-soft border border-brand/10 rounded-2xl px-4 py-3 text-sm text-gray-800 outline-none transition-all duration-200 w-full focus:border-brand placeholder:text-gray-400;
+    }
+    .card {
+        @apply bg-white border border-brand/10 rounded-3xl shadow-xl;
+    }
+}

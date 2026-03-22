@@ -4,13 +4,9 @@ const db = require('./db');
 module.exports = (server) => {
     const io = new Server(server, {
         cors: {
-            origin: [
-                'https://reese-pagtalunan.github.io',
-                'http://localhost:5173'
-            ],
-            methods: ['GET', 'POST']
+            origin: '*',
         }
-    })
+    });
 
     io.on('connection', (socket) => {
         console.log('A user connected:', socket.id);
@@ -27,26 +23,17 @@ module.exports = (server) => {
             const { senderId, recipientId, content } = data;
 
             try {
-                // 1. Look up numeric IDs for PostgreSQL
-                const usersRes = await db.query('SELECT auth0_id, id FROM users WHERE auth0_id IN ($1, $2)', [senderId, recipientId]);
-                const userMap = {};
-                usersRes.rows.forEach(u => userMap[u.auth0_id] = u.id);
-                
-                const sId = userMap[senderId];
-                const rId = userMap[recipientId];
-                
-                if (!sId || !rId) throw new Error('User not found');
-
+                // 1. Save message to PostgreSQL
                 const insertQuery = `
                     INSERT INTO messages (sender_id, recipient_id, content)
                     VALUES ($1, $2, $3)
                     RETURNING id, created_at;
                 `;
-                const result = await db.query(insertQuery, [sId, rId, content]);
+                const result = await db.query(insertQuery, [senderId, recipientId, content]);
 
                 const messageRecord = {
                     id: result.rows[0].id,
-                    senderId, // Keep Auth0 IDs for frontend
+                    senderId,
                     recipientId,
                     content,
                     createdAt: result.rows[0].created_at
