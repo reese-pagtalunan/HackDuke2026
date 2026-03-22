@@ -68,16 +68,23 @@ router.get('/:userId/list', async (req, res) => {
         `;
         const friendsRes = await db.query(friendQuery, [numericId]);
 
-        // Suggestions — exclude anyone we already have a relationship with
+        // Suggestions — sorted by encounter_count (most seen nearby first)
         const encountersQuery = `
-            SELECT u.id, u.auth0_id, u.first_name, u.last_name, 5 as encounter_count
+            SELECT 
+                u.id, u.auth0_id, u.first_name, u.last_name,
+                COALESCE(e.encounter_count, 0) AS encounter_count
             FROM users u
+            LEFT JOIN encounters e ON (
+                (e.user_a_id = u.id AND e.user_b_id = $1) OR
+                (e.user_b_id = u.id AND e.user_a_id = $1)
+            )
             WHERE u.id != $1
               AND u.id NOT IN (
                   SELECT requester_id FROM friendships WHERE addressee_id = $1
                   UNION
                   SELECT addressee_id FROM friendships WHERE requester_id = $1
               )
+            ORDER BY encounter_count DESC, u.first_name ASC
             LIMIT 50
         `;
         const encountersRes = await db.query(encountersQuery, [numericId]);

@@ -14,35 +14,38 @@ function getDistanceMeters(lat1, lng1, lat2, lng2) {
 }
 
 // POST /api/location/ping
-// Input: { userId, lat, lng }
+// Input: { auth0Id, lat, lng }
 router.post('/ping', async (req, res) => {
-    const { userId, lat, lng } = req.body;
+    const { auth0Id, lat, lng } = req.body;
 
-    if (!userId || !lat || !lng) {
-        return res.status(400).json({ error: 'Missing userId, lat, or lng' });
+    if (!auth0Id || lat == null || lng == null) {
+        return res.status(400).json({ error: 'Missing auth0Id, lat, or lng' });
     }
 
     try {
-        // 1. Update this user's location
+        // 1. Update this user's location using auth0_id
         const updateQuery = `
             UPDATE users 
             SET lat = $1, lng = $2, last_ping_time = CURRENT_TIMESTAMP
-            WHERE id = $3
-            RETURNING id;
+            WHERE auth0_id = $3
+            RETURNING id, first_name, last_name;
         `;
-        const userRes = await db.query(updateQuery, [lat, lng, userId]);
+        const userRes = await db.query(updateQuery, [lat, lng, auth0Id]);
 
         if (userRes.rowCount === 0) {
             return res.status(404).json({ error: 'User not found' });
         }
 
-        // 2. Get all recently active users
+        const userId = userRes.rows[0].id;
+
+        // 2. Get all recently active users (pinged in the last 5 minutes)
         const nearbyQuery = `
-            SELECT id, username, lat, lng 
+            SELECT id, first_name, last_name, lat, lng 
             FROM users 
             WHERE id != $1 
             AND last_ping_time > CURRENT_TIMESTAMP - INTERVAL '5 minutes'
-            AND lat IS NOT NULL;
+            AND lat IS NOT NULL
+            AND lng IS NOT NULL;
         `;
         const allUsers = await db.query(nearbyQuery, [userId]);
 
@@ -51,7 +54,7 @@ router.post('/ping', async (req, res) => {
             getDistanceMeters(lat, lng, u.lat, u.lng) <= 50
         );
 
-        // 4. Log encounters for nearby users
+        // 4. Record encounters for nearby users
         const updates = nearbyUsers.map(nearbyUser => {
             const userA = Math.min(userId, nearbyUser.id);
             const userB = Math.max(userId, nearbyUser.id);
@@ -67,24 +70,12 @@ router.post('/ping', async (req, res) => {
             `, [userA, userB]);
         });
 
-        const encounterResults = await Promise.all(updates);
-
-        // 5. Check if any encounters hit the suggestion threshold (3+)
-        const suggestions = encounterResults
-            .map((r, i) => ({
-                user: nearbyUsers[i],
-                count: r.rows[0]?.encounter_count
-            }))
-            .filter(e => e.count >= 3);
+        await Promise.all(updates);
 
         res.json({
             success: true,
-            passedBy: nearbyUsers.map(u => ({ id: u.id, username: u.username })),
-            suggestions: suggestions.map(s => ({
-                id: s.user.id,
-                username: s.user.username,
-                encounterCount: s.count
-            }))
+            nearbyCount: nearbyUsers.length,
+            passedBy: nearbyUsers.map(u => ({ id: u.id, name: `${u.first_name} ${u.last_name}` })),
         });
 
     } catch (err) {
