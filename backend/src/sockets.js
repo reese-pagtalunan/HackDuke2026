@@ -4,9 +4,13 @@ const db = require('./db');
 module.exports = (server) => {
     const io = new Server(server, {
         cors: {
-            origin: '*',
+            origin: [
+                'https://reese-pagtalunan.github.io',
+                'http://localhost:5173'
+            ],
+            methods: ['GET', 'POST']
         }
-    });
+    })
 
     io.on('connection', (socket) => {
         console.log('A user connected:', socket.id);

@@ -9,6 +9,8 @@ const locationRoutes = require('./routes/location');
 const friendsRoutes = require('./routes/friends');
 const usersRoutes = require('./routes/user');
 const messagesRoutes = require('./routes/messages');
+const icebreakerRoutes = require('./routes/icebreaker');
+
 
 const app = express();
 const server = http.createServer(app);
@@ -51,6 +53,8 @@ app.use('/api/location', checkJwt, locationRoutes);
 app.use('/api/friends', checkJwt, friendsRoutes);
 app.use('/api/user', checkJwt, usersRoutes);
 app.use('/api/messages', checkJwt, messagesRoutes);
+app.use('/api/icebreaker', checkJwt, icebreakerRoutes);
+
 
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
