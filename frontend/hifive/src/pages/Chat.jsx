@@ -1,13 +1,13 @@
 import { useAuth0 } from '@auth0/auth0-react'
 import { useEffect, useState, useRef } from 'react'
-import { useParams, Link } from 'react-router-dom'
+import { useParams } from 'react-router-dom'
 import { io } from 'socket.io-client'
 import Navbar from '../components/Navbar'
 
 const API_URL = import.meta.env.VITE_API_URL || 'https://hifiveapp-7y7nb.ondigitalocean.app'
 
 export default function Chat() {
-    const { user }                = useAuth0()
+    const { user, getAccessTokenSilently } = useAuth0()
     const { friendId }            = useParams()
     const [messages, setMessages] = useState([])
     const [input, setInput]       = useState('')
@@ -15,8 +15,13 @@ export default function Chat() {
     const bottomRef               = useRef(null)
 
     useEffect(() => {
-        socketRef.current = io(API_URL)
-        socketRef.current.emit('identify', user.sub)
+        socketRef.current = io(API_URL, {
+            transports: ['polling', 'websocket']
+        })
+        socketRef.current.on('connect', () => {
+            console.log('Socket connected, identifying as:', user.sub)
+            socketRef.current.emit('identify', user.sub)
+        })
         socketRef.current.on('receive_message', msg => {
             setMessages(prev => [...prev, msg])
         })
@@ -24,24 +29,24 @@ export default function Chat() {
     }, [])
 
     useEffect(() => {
-    async function loadHistory() {
-        try {
-            const token = await getAccessTokenSilently()
-            const res = await fetch(
-                `${API_URL}/api/messages/${encodeURIComponent(user.sub)}/${encodeURIComponent(friendId)}`,
-                { headers: { Authorization: `Bearer ${token}` } }
-            )
-            const data = await res.json()
-            setMessages(data.messages.map(m => ({
-                senderId: m.sender_id,
-                content: m.content,
-                createdAt: m.created_at
-            })))
-        } catch (err) {
-            console.error(err)
+        async function loadHistory() {
+            try {
+                const token = await getAccessTokenSilently()
+                const res = await fetch(
+                    `${API_URL}/api/messages/${encodeURIComponent(user.sub)}/${encodeURIComponent(friendId)}`,
+                    { headers: { Authorization: `Bearer ${token}` } }
+                )
+                const data = await res.json()
+                setMessages(data.messages.map(m => ({
+                    senderId: m.sender_id,
+                    content: m.content,
+                    createdAt: m.created_at
+                })))
+            } catch (err) {
+                console.error('History load error:', err)
+            }
         }
-    }
-    loadHistory()
+        loadHistory()
     }, [friendId])
 
     useEffect(() => {
