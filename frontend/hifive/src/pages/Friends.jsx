@@ -129,7 +129,10 @@ export default function Friends() {
                                             <div className="w-10 h-10 rounded-full bg-brand-light flex items-center justify-center text-brand font-bold uppercase">
                                                 {f.first_name?.[0] || ''}{f.last_name?.[0] || ''}
                                             </div>
-                                            <p className="font-semibold text-gray-900">{f.first_name} {f.last_name}</p>
+                                            <div>
+                                                <p className="font-semibold text-gray-900">{f.first_name} {f.last_name}</p>
+                                                {f.encounter_count > 0 && <p className="text-xs font-bold text-blue-600 mt-0.5">{f.encounter_count} 👋 Hi-Fives</p>}
+                                            </div>
                                         </div>
                                         <Link to={`/chat/${encodeURIComponent(f.auth0_id)}`} className="btn-primary px-5 py-2.5 text-sm no-underline">
                                             Message 💬
