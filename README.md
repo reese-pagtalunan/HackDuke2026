@@ -12,74 +12,181 @@ Meeting new people is hard. Social media optimizes for follower counts, likes, a
 
 ---
 
-## What We're Building
+## What We Built
 
-HiFive facilitates two distinct pathways for connection, both designed to end at the same place: **an in-person conversation.**
+HiFive provides two distinct pathways for connection, both designed to end at the same place: **an in-person conversation.**
+
+### 🤚 HiFive (Proximity-Based Discovery)
+- Your phone silently pings your GPS location every 30 seconds in the background
+- When another HiFive user is within **50 meters** of you, the encounter is recorded
+- The more times you cross paths with someone, the higher they appear in your **Suggestions** feed
+- You can send them a friend request (a "HiFive") directly from the app
+
+### 👥 Manual Friend Requests
+- Search for users by name and send a friend request
+- The recipient must **manually accept** — no auto-approvals
+- Once connected, you can open a real-time chat
+
+### 💬 Real-Time Messaging
+- WebSocket-powered messaging via Socket.IO
+- Messages are persisted in the database so they survive page reloads
+- Chat windows are contained and mobile-friendly
+
+### 👤 Profile Management
+- Edit your first name, last name, and interests
+- Auth0 handles sign-in — no passwords to manage
 
 ---
 
-### Connection Method 1: Manual Add
+## Tech Stack
 
-You can manually add someone you're weakly connected to — a classmate, someone you've seen around, a friend of a friend.
+### Frontend
+| Technology | Purpose |
+|---|---|
+| **React** (with Vite) | UI framework |
+| **React Router DOM** | Client-side routing |
+| **Tailwind CSS v4** | Styling and responsive design |
+| **Socket.IO Client** | Real-time WebSocket communication |
+| **Auth0 (`@auth0/auth0-react`)** | Authentication and JWT management |
+| **GitHub Pages** | Static frontend hosting |
 
-**How it works:**
-1. You send a friend request to someone
-2. They must add you back to initiate a conversation (mutual opt-in)
-3. Once matched, an **AI-generated question** is sent to both of you based on your **shared interests**
-4. Both users' profiles become partially public — you can now see each other's overlapping hobbies and interests (profiles are private by default, stored in the backend)
-5. The chat has a **built-in conversation end point** — once reached, the app nudges both users toward meeting in person
+### Backend
+| Technology | Purpose |
+|---|---|
+| **Node.js / Express** | REST API server |
+| **Socket.IO** | WebSocket server for real-time chat |
+| **PostgreSQL** | Primary database (users, friendships, messages, encounters) |
+| **`pg` (node-postgres)** | Database client |
+| **`express-oauth2-jwt-bearer`** | Auth0 JWT validation middleware |
+| **DigitalOcean App Platform** | Hosting and managed database |
 
-**Why this works:**  
-Shared context removes awkwardness. Instead of a cold "hey," the first message is already warm and relevant.
+### Infrastructure
+| Technology | Purpose |
+|---|---|
+| **GitHub Actions** | CI/CD pipeline — auto-deploys frontend to GitHub Pages on push |
+| **Auth0** | Identity provider (OAuth2 / JWT) |
+| **DigitalOcean** | Backend API hosting + managed PostgreSQL |
 
 ---
 
-### Connection Method 2: HiFive (Proximity-Based)
+## How Proximity Detection Works
 
-When another HiFive user is within **10 meters** of you, you get the option to send them a HiFive — a lightweight, low-pressure signal of interest.
+```
+Phone A (you)          Backend                  Phone B (nearby user)
+     |                    |                            |
+     |-- POST /location/ping (lat, lng) -->            |
+     |                    |<-- POST /location/ping ----|
+     |                    |                            |
+     |          Haversine formula:                     |
+     |          distance(A, B) <= 50m?                 |
+     |                    |                            |
+     |          encounters.encounter_count++           |
+     |                    |                            |
+     |<-- suggestions sorted by encounter_count -------|
+```
 
-**How it works:**
-1. Your phone detects a nearby HiFive user
-2. You can optionally initiate a HiFive — a mutual ping
-3. If both parties HiFive, a connection opens with shared interests revealed
+Every 30 seconds, each app silently sends its current GPS coordinates to the backend. The backend uses the **Haversine formula** to compute the distance between all recently-active users and records an encounter for any pair within 50 meters of each other. The **Suggestions** tab in the app then surfaces the people you've encountered the most — people you've physically been near, but may not have spoken to yet.
 
-**Key design principle:**  
-> Follower counts and friend counts are **never shown.** HiFive is not a popularity contest.
+---
+
+## AI Used to Build This
+
+This project was built with significant assistance from **Google Gemini** (via [Antigravity](https://antigravity.ai)), an AI coding agent. The AI contributed to:
+
+- **Architecture design** — proposing the full tech stack and proximity detection approach
+- **Backend API development** — writing and debugging all Express routes (`/friends`, `/location`, `/messages`, `/user`)
+- **Real-time messaging** — implementing the Socket.IO server and client-side chat
+- **Frontend React components** — building `Dashboard.jsx`, `Friends.jsx`, `Chat.jsx`, `ProfileSetup.jsx`, and `LocationTracker.jsx`
+- **CI/CD pipeline** — writing the GitHub Actions workflow for auto-deployment to GitHub Pages
+- **Mobile responsiveness** — diagnosing and fixing viewport issues across the entire app
+- **Database schema** — designing the `users`, `friendships`, `encounters`, and `messages` tables
+
+The human contributors focused on product decisions, design direction, testing, and refining features.
+
+---
+
+## Database Schema
+
+```sql
+-- Users
+CREATE TABLE users (
+    id SERIAL PRIMARY KEY,
+    auth0_id VARCHAR(255) UNIQUE NOT NULL,
+    first_name VARCHAR(100),
+    last_name VARCHAR(100),
+    interests TEXT,
+    lat DOUBLE PRECISION,
+    lng DOUBLE PRECISION,
+    last_ping_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Encounters (proximity pairings)
+CREATE TABLE encounters (
+    id SERIAL PRIMARY KEY,
+    user_a_id INTEGER REFERENCES users(id),
+    user_b_id INTEGER REFERENCES users(id),
+    encounter_count INTEGER DEFAULT 1,
+    last_seen_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE(user_a_id, user_b_id)
+);
+
+-- Friendships
+CREATE TABLE friendships (
+    id SERIAL PRIMARY KEY,
+    requester_id INTEGER REFERENCES users(id),
+    addressee_id INTEGER REFERENCES users(id),
+    status VARCHAR(20) DEFAULT 'pending', -- 'pending' | 'accepted'
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE(requester_id, addressee_id)
+);
+
+-- Messages
+CREATE TABLE messages (
+    id SERIAL PRIMARY KEY,
+    sender_id INTEGER REFERENCES users(id),
+    recipient_id INTEGER REFERENCES users(id),
+    content TEXT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+```
+
+---
+
+## Running Locally
+
+### Prerequisites
+- Node.js 18+
+- A PostgreSQL database
+- Auth0 account (free tier works)
+
+### Backend
+```bash
+cd backend
+cp .env.example .env  # Fill in DATABASE_URL, AUTH0_AUDIENCE, AUTH0_ISSUER
+npm install
+npm run dev
+```
+
+### Frontend
+```bash
+cd frontend/hifive
+cp .env.example .env  # Set VITE_API_URL=http://localhost:3000
+npm install
+npm run dev
+```
 
 ---
 
 ## Core Design Principles
 
-| Principle | What it means in practice |
+| Principle | What it means |
 |---|---|
-| **Profiles are private by default** | Your interests and info are only revealed when a mutual connection is made |
-| **No follower counts** | Social clout is invisible — connections are purely interest-based |
-| **AI-assisted icebreaking** | The first question is generated based on what you actually have in common |
-| **Built-in conversation endings** | Chats are designed to close, pushing users toward real-world meetups |
-| **Proximity-first** | The HiFive feature only works when you're physically near someone |
+| **Profiles are private by default** | Info is only revealed when both users connect |
+| **No follower counts** | Social clout is invisible — connections are interest-based |
+| **Proximity-first discovery** | Suggestions prioritize people you've physically been near |
+| **Manual opt-in** | No auto-accepted friend requests — both parties must agree |
 
 ---
 
-## Tech Stack (Planned)
-
-- **Frontend:** React Native (iOS + Android)
-- **Backend:** Node.js / Firebase
-- **AI:** Anthropic Claude API — generates personalized icebreaker questions from shared interest data
-- **Location:** iOS/Android native location APIs, geofencing for 10m proximity detection
-- **Auth:** OAuth / Apple Sign-In
-
----
-
-## Why HiFive?
-
-Most social apps make it easier to stay online. HiFive makes it easier to go offline — together. By removing follower counts, surfacing shared interests, and building in a natural conversation endpoint, HiFive lowers every decision barrier between meeting someone new and actually becoming friends.
-
----
-
-## Status
-
-🚧 Early concept / active development
-
----
-
-*Built with the belief that the best connections happen face to face.*
+*Built at HackDuke 2026 with the belief that the best connections happen face to face.*
